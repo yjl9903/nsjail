@@ -145,6 +145,7 @@ static int standaloneMode(nsjconf_t* nsjconf) {
 	for (;;) {
 		if (!subproc::runChild(nsjconf, nsjconf->stdin_redirect_fd,
 				nsjconf->stdout_redirect_fd, nsjconf->stderr_redirect_fd)) {
+			nsjconf->process_exit_code = 2147483647;
 			LOG_E("Couldn't launch the child process");
 			return 0xff;
 		}
@@ -237,15 +238,14 @@ int main(int argc, char* argv[]) {
 
 		/* write usage log */
 		if (!nsjconf->usage_log_file_name.empty()) {
-		    FILE* usage_log_file = fopen(nsjconf->usage_log_file_name.c_str(), "w");
-		    fprintf(usage_log_file, "user %lld\n", nsjconf->user_time_consumption / 1000000); // ms
-		    fprintf(usage_log_file, "kernel %lld\n", nsjconf->kernel_time_consumption / 1000000); // ms
-		    fprintf(usage_log_file, "pass %lld\n", (get_wall_time() - start_time) / 1000); // ms
-		    fprintf(usage_log_file, "memory %lld\n", nsjconf->memory_consumption / 1024); // kb
-		    fprintf(usage_log_file, "exit %d\n", nsjconf->process_exit_code);
-		    fprintf(usage_log_file, "signal %d\n", nsjconf->process_exit_signal);
+			FILE* usage_log_file = fopen(nsjconf->usage_log_file_name.c_str(), "w");
+			fprintf(usage_log_file, "user %lld\n", nsjconf->user_time_consumption / 1000000); // ms
+			fprintf(usage_log_file, "kernel %lld\n", nsjconf->kernel_time_consumption / 1000000); // ms
+			fprintf(usage_log_file, "pass %lld\n", (get_wall_time() - start_time) / 1000); // ms
+			fprintf(usage_log_file, "memory %lld\n", nsjconf->memory_consumption / 1024); // kb
+			fprintf(usage_log_file, "exit %d\n", nsjconf->process_exit_code);
+			fprintf(usage_log_file, "signal %d\n", nsjconf->process_exit_signal);
 		}
-
 	}
 
 	sandbox::closePolicy(nsjconf.get());
